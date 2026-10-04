@@ -1,0 +1,10 @@
+services:
+  default:
+    build: .
+    image: control-protocols-sandbox
+    init: true
+    command: tail -f /dev/null
+    network_mode: none
+    cpus: 1.0
+    mem_limit: 1gb
+    pids_limit: 256
