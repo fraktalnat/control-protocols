@@ -27,29 +27,6 @@ def unescape_code(code: str) -> str:
     return code
 
 
-def normalize_content(content: Any) -> str:
-    """Flatten an inspect_ai message content into a plain string.
-
-    Handles the three shapes inspect_ai returns:
-      - str (the common case)
-      - list of message parts (reasoning models): join `.text` of each
-      - anything else: ``str()`` fallback
-    """
-    if isinstance(content, str):
-        return content
-    if isinstance(content, list):
-        parts = []
-        for p in content:
-            if isinstance(p, str):
-                parts.append(p)
-            elif hasattr(p, "content"):
-                parts.append(p.content)
-            else:
-                parts.append(str(p))
-        return "\n".join(parts)
-    return str(content)
-
-
 def between(text: str, start: str, end: str) -> Optional[str]:
     if start not in text:
         return None

@@ -24,7 +24,7 @@ def edit_with_trusted() -> Solver:
         # T's edit, not a continuation of any prior dialogue.
         state.messages = [ChatMessageUser(content=prompt)]
         await generate(state)
-        content = state.output.message.content
+        content = state.output.completion
         try:
             edited = unescape_code(content.split("```python")[1].split("```")[0])
         except (AttributeError, IndexError):
@@ -60,7 +60,7 @@ def trusted_edit_task(backdoor_log_path: str | None = None) -> Task:
                 Sample(
                     input=EDIT_OUT_BACKDOOR_PROMPT.format(
                         question=sample.metadata.get("question"),
-                        code=sample.metadata.get("backdoored_code"),
+                        code=sample.metadata.get("backdoored code"),
                     ),
                     target="edited",
                     metadata={

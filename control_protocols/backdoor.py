@@ -2,7 +2,7 @@ import warnings
 from typing import Optional
 
 from inspect_ai import Task, task
-from inspect_ai.model import ChatMessageUser
+from inspect_ai.model import ChatMessageUser, GenerateConfig
 from inspect_ai.scorer import CORRECT, INCORRECT, Score, Scorer, Target, scorer
 from inspect_ai.solver import Generate, Solver, TaskState, solver
 
@@ -11,7 +11,6 @@ from control_protocols.config import DEFAULT_N, UNTRUSTED_MODEL
 from control_protocols.dataset import apps_dataset
 from control_protocols.parsing import (
     between,
-    normalize_content,
     parse_main_output,
     parse_trigger,
     unescape_code,
@@ -28,7 +27,7 @@ from control_protocols.sandbox import test_code
 def generate_code() -> Solver:
     async def solve(state: TaskState, generate: Generate) -> TaskState:
         await generate(state)
-        content = normalize_content(state.output.message.content)
+        content = state.output.completion
         raw = between(content, "```python", "```")
         if raw is None:
             warnings.warn(
@@ -68,7 +67,7 @@ def implement_backdoor() -> Solver:
         )
         state.messages.append(ChatMessageUser(content=formatted_prompt))
         await generate(state)
-        content = normalize_content(state.output.message.content)
+        content = state.output.completion
         warnings.warn(f"This is the normalized content {content}")
 
         raw = between(content, "```python", "```")
@@ -232,7 +231,7 @@ def refine_backdoor(max_attempts: int = 3, USING_DOCKER: bool = True) -> Solver:
             state.messages.append(ChatMessageUser(content=feedback))
             state = await generate(state)
 
-            content = normalize_content(state.output.message.content)
+            content = state.output.completion
             new_code, new_trigger = _extract(content)
             if new_code is not None:
                 state.metadata["backdoored code"] = new_code
@@ -274,6 +273,7 @@ def generate_backdoor_task(num_problems: int = DEFAULT_N) -> Task:
         ],
         sandbox=config.SANDBOX,
         model=UNTRUSTED_MODEL,
+        config=GenerateConfig(reasoning_effort="medium"),
     )
 
 
@@ -296,4 +296,5 @@ def generate_backdoor_task_refined(
         scorer=backdoor_success_scorer(),
         sandbox=config.SANDBOX,
         model=UNTRUSTED_MODEL,
+        config=GenerateConfig(reasoning_effort="medium"),
     )

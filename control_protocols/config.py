@@ -11,6 +11,7 @@ TRUSTED_MODEL = "openrouter/google/gemma-4-31b-it"
 USING_DOCKER = True  # False runs untrusted code directly on the host
 docker_exec = "/usr/bin/python3"
 local_exec = "python3"
+EXEC_TIMEOUT_SECONDS = 10  # max wall time for one run of untrusted code
 SANDBOX = (
     ("docker", str(PROJECT_ROOT / "sandbox" / "compose.yaml"))
     if USING_DOCKER
